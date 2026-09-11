@@ -15,7 +15,7 @@ export function Comparison() {
       </Reveal>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Reveal className="rounded-[30px] border border-red-500/20 bg-red-500/5 p-6 md:p-8">
+        <Reveal className="premium-card rounded-[30px] border border-red-500/20 bg-red-500/5 p-6 md:p-8">
           <div className="mb-5 flex items-center justify-between">
             <h3 className="font-display text-2xl text-white">Antes</h3>
             <span className="rounded-full border border-red-400/30 bg-red-500/10 px-2 py-1 text-xs text-red-200">Manual</span>
@@ -37,7 +37,7 @@ export function Comparison() {
           </ul>
         </Reveal>
 
-        <Reveal delay={0.08} className="rounded-[30px] border border-emerald-500/20 bg-emerald-500/5 p-6 md:p-8">
+        <Reveal delay={0.08} className="premium-card rounded-[30px] border border-emerald-500/20 bg-emerald-500/5 p-6 md:p-8">
           <div className="mb-5 flex items-center justify-between">
             <h3 className="font-display text-2xl text-white">Después</h3>
             <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-1 text-xs text-emerald-200">Automatizado</span>

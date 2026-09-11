@@ -51,7 +51,7 @@ export function Solutions() {
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
         {solutions.map((solution, index) => (
           <Reveal key={solution.title} delay={index * 0.05}>
-            <div className="flex h-full flex-col rounded-[30px] border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-1 hover:border-primary/25 hover:bg-white/[0.05]">
+            <div className="premium-card flex h-full flex-col rounded-[30px] border border-white/10 bg-white/[0.03] p-5 transition hover:-translate-y-1 hover:border-primary/25 hover:bg-white/[0.05]">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
                 <solution.icon className="h-5 w-5" />
               </div>

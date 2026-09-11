@@ -25,12 +25,12 @@ export function Process() {
         />
       </Reveal>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="process-flow grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {steps.map((step, index) => (
           <Reveal key={step.title} delay={index * 0.05}>
-            <div className="relative rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
+            <div className="premium-card relative rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
               <div className="mb-5 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
+                <div className="process-node flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
                   <step.icon className="h-5 w-5" />
                 </div>
                 <span className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">0{index + 1}</span>

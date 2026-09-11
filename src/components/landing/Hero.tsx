@@ -5,8 +5,12 @@ import { ChatPlay } from './ChatPlay'
 import { Reveal } from './Reveal'
 import { Stats } from './Stats'
 
-const exampleMessages = [
-  { sender: 'bot', text: '¡Hola! 😊 Estoy aquí para ayudarte a responder clientes y cerrar más ventas.', time: '9:42' },
+const exampleMessages: {
+  sender: 'bot' | 'user'
+  text: string
+  time?: string
+}[] = [
+  { sender: 'bot', text: '¡Hola! Estoy aquí para ayudarte a responder clientes y cerrar más ventas.', time: '9:42' },
   { sender: 'user', text: 'Necesitamos atender más leads sin sumar personal.', time: '9:42' },
   { sender: 'bot', text: 'Perfecto. Podemos automatizar atención y reservas en WhatsApp, web y redes.', time: '9:43' },
   { sender: 'user', text: '¿Cuánto tardaría en implementarse?', time: '9:43' },
@@ -19,7 +23,7 @@ export function Hero() {
         <Reveal className="space-y-8">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-primary-foreground/90">
             <Sparkles className="h-3.5 w-3.5" />
-            IA para ventas y atención
+            <span className="text-gradient">IA</span> para <span className="text-gradient">ventas</span> y atención
           </div>
 
           <div className="space-y-5">
@@ -57,7 +61,7 @@ export function Hero() {
         <Reveal delay={0.1} className="relative">
           <div className="absolute -inset-6 rounded-[36px] bg-gradient-to-r from-primary/20 via-transparent to-accent/20 blur-2xl" />
           <div className="relative">
-            <ChatPlay title="Asistente de ventas" messages={exampleMessages} />
+<ChatPlay title="Asistente de ventas" messages={exampleMessages} />
           </div>
         </Reveal>
       </div>

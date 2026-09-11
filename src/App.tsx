@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
-import viteLoo from '/vite.svg'
+import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
@@ -28,7 +28,7 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
-      <div clasName="socials">
+      <div className="socials">
         <a href="https://github.com/vitejs/vite" target="_blank" rel="noopener noreferrer">
           <svg
             xmlns="http://www.w3.org/2000/svg"

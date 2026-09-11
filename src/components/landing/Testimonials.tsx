@@ -22,7 +22,7 @@ const testimonials = [
 
 export function Testimonials() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+    <section id="testimonios" className="mx-auto max-w-7xl px-4 py-20 md:px-6">
       <Reveal>
         <SectionHeader
           eyebrow="Casos de uso"
@@ -35,8 +35,8 @@ export function Testimonials() {
       <div className="grid gap-6 lg:grid-cols-3">
         {testimonials.map((item, index) => (
           <Reveal key={item.name} delay={index * 0.06}>
-            <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
-              <Quote className="mb-4 h-7 w-7 text-primary" />
+            <div className="premium-card rounded-[28px] border border-white/10 bg-white/[0.03] p-6">
+              <Quote className="quote-mark mb-4 h-7 w-7 text-primary" />
               <p className="mb-6 text-sm leading-7 text-slate-200">{item.quote}</p>
               <div>
                 <div className="font-semibold text-white">{item.name}</div>

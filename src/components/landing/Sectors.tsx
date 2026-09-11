@@ -1,15 +1,15 @@
-import { ArrowRight, Building2, CarFront, HeartPulse, ShoppingBag, Store, TrendingUp } from 'lucide-react'
+import { ArrowRight, BriefcaseBusiness, HeartPulse, Landmark, RadioTower, ShoppingCart, Truck } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Reveal } from './Reveal'
 import { SectionHeader } from './SectionHeader'
 
 const sectors = [
-  { icon: Store, name: 'Retail', description: 'Ventas, disponibilidad y seguimiento de pedidos en tiempo real.', capabilities: ['Catálogo', 'Pedidos', 'Promociones'] },
-  { icon: HeartPulse, name: 'Salud', description: 'Agendado, recordatorios y respuesta de dudas clínicas esenciales.', capabilities: ['Citas', 'Recordatorios', 'Preconsulta'] },
-  { icon: Building2, name: 'Inmobiliarias', description: 'Contacto inicial, visitas y clasificación de leads calificados.', capabilities: ['Visitas', 'Prospección', 'Seguimiento'] },
-  { icon: CarFront, name: 'Automotriz', description: 'Captura de leads, cotizaciones y coordinación de prueba de manejo.', capabilities: ['Cotizaciones', 'Seguimiento', 'Agendado'] },
-  { icon: ShoppingBag, name: 'E-commerce', description: 'Resuelve dudas de compra y aumenta la tasa de cierre por chat.', capabilities: ['Recomendaciones', 'Pedidos', 'Soporte'] },
-  { icon: TrendingUp, name: 'Servicios B2B', description: 'Califica oportunidades y acelera la respuesta comercial.', capabilities: ['Leads', 'Agendado', 'Cobertura'] },
+  { icon: Landmark, name: 'Servicios financieros y Fintech', description: 'Atención, clasificación de clientes, consultas, soporte y captación comercial.', capabilities: ['Clasificación', 'Soporte', 'Captación'] },
+  { icon: RadioTower, name: 'Telecomunicaciones', description: 'Soporte, consultas de planes, incidencias, ventas y atención masiva.', capabilities: ['Planes', 'Incidencias', 'Ventas'] },
+  { icon: HeartPulse, name: 'Salud y redes clínicas', description: 'Agendamiento, orientación inicial, recordatorios y atención administrativa.', capabilities: ['Agendamiento', 'Orientación', 'Recordatorios'] },
+  { icon: Truck, name: 'Logística y transporte', description: 'Seguimiento, cotizaciones, estados de envío y atención operativa.', capabilities: ['Seguimiento', 'Cotizaciones', 'Operación'] },
+  { icon: ShoppingCart, name: 'Retail y E-commerce', description: 'Catálogo, recomendaciones, pedidos, soporte y ventas.', capabilities: ['Catálogo', 'Pedidos', 'Recomendaciones'] },
+  { icon: BriefcaseBusiness, name: 'Servicios B2B y tecnología', description: 'Calificación de leads, demos, reuniones, soporte y ventas empresariales.', capabilities: ['Leads', 'Demos', 'Soporte'] },
 ]
 
 export function Sectors() {
@@ -18,8 +18,8 @@ export function Sectors() {
       <Reveal>
         <SectionHeader
           eyebrow="Empresas"
-          title="Un chatbot adaptado a tu negocio"
-          description="No todas las empresas operan igual. Por eso diseñamos cada flujo para la forma real de vender y atender."
+          title="IA conversacional diseñada para operaciones empresariales"
+          description="Automatizamos atención, ventas y procesos según el volumen, canales y operación de cada organización."
           align="center"
         />
       </Reveal>
@@ -27,7 +27,7 @@ export function Sectors() {
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {sectors.map((sector, index) => (
           <Reveal key={sector.name} delay={index * 0.05}>
-            <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-6">
+            <div className="premium-card group rounded-[30px] border border-white/10 bg-gradient-to-b from-white/[0.055] to-white/[0.018] p-6 shadow-[0_18px_60px_rgba(2,6,23,0.18)] transition duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_24px_70px_rgba(30,64,175,0.2)]">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
                 <sector.icon className="h-5 w-5" />
               </div>
@@ -42,7 +42,7 @@ export function Sectors() {
               </div>
               <Button variant="outline-light" asChild>
                 <a href="#contacto">
-                  Quiero este enfoque <ArrowRight className="h-4 w-4" />
+                  Explorar solución <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>
             </div>

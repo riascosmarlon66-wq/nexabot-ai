@@ -37,7 +37,7 @@ const benefits = [
 
 export function Benefits() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
+    <section id="beneficios" className="mx-auto max-w-7xl px-4 py-20 md:px-6">
       <Reveal>
         <SectionHeader
           eyebrow="Beneficios"
@@ -50,7 +50,7 @@ export function Benefits() {
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {benefits.map((benefit, index) => (
           <Reveal key={benefit.title} delay={index * 0.06}>
-            <div className="group flex h-full flex-col rounded-[30px] border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.02] p-6 transition hover:border-primary/30 hover:bg-white/[0.06]">
+            <div className="premium-card group flex h-full flex-col rounded-[30px] border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.02] p-6 transition hover:border-primary/30 hover:bg-white/[0.06]">
               <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
                 <benefit.icon className="h-6 w-6" />
               </div>

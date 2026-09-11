@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Megaphone, MessageSquareText, ShieldCheck, Sparkles, Zap } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Megaphone, MessageSquareText, ShieldCheck, Zap } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Reveal } from './Reveal'
 import { SectionHeader } from './SectionHeader'
@@ -48,7 +48,7 @@ export function Integrations() {
         </Reveal>
 
         <Reveal delay={0.08}>
-          <div className="rounded-[30px] border border-white/10 bg-slate-950/40 p-6">
+          <div className="network-panel premium-card rounded-[30px] border border-white/10 bg-slate-950/40 p-6">
             <div className="mb-6 flex items-center gap-2 text-white">
               <Zap className="h-5 w-5 text-primary" />
               <p className="font-medium">Integraciones comunes</p>

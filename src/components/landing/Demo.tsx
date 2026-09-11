@@ -48,7 +48,7 @@ export function Demo() {
 
       <div className="grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
         <Reveal>
-          <div className="rounded-[30px] border border-white/10 bg-white/[0.03] p-4 md:p-6">
+          <div className="premium-card rounded-[30px] border border-white/10 bg-white/[0.03] p-4 md:p-6">
             <div className="mb-5 flex items-center gap-3 text-white">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-primary">
                 <Building2 className="h-5 w-5" />
@@ -81,7 +81,7 @@ export function Demo() {
         </Reveal>
 
         <Reveal delay={0.08}>
-          <div className="rounded-[30px] border border-white/10 bg-slate-950/40 p-4 md:p-6">
+          <div className="premium-card rounded-[30px] border border-white/10 bg-slate-950/40 p-4 md:p-6">
             <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Sparkles className="h-4 w-4 text-primary" />

@@ -4,7 +4,7 @@ import { Button } from '../ui/button'
 export function FinalCTA() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 md:px-6">
-      <div className="rounded-[36px] border border-primary/20 bg-gradient-to-r from-primary/15 via-slate-950 to-accent/15 p-6 text-center shadow-glow md:p-10">
+      <div className="premium-card rounded-[36px] border border-primary/20 bg-gradient-to-r from-primary/15 via-slate-950 to-accent/15 p-6 text-center shadow-glow md:p-10">
         <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-primary text-white shadow-glow">
           <MessageSquareText className="h-6 w-6" />
         </div>

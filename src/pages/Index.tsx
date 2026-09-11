@@ -1,7 +1,6 @@
 import { BackgroundFX } from '../components/landing/BackgroundFX'
 import { Benefits } from '../components/landing/Benefits'
 import { Calculator } from '../components/landing/Calculator'
-import { ChatPlay } from '../components/landing/ChatPlay'
 import { Comparison } from '../components/landing/Comparison'
 import { Demo } from '../components/landing/Demo'
 import { FAQ } from '../components/landing/FAQ'

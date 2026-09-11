@@ -1,13 +1,21 @@
 import { Menu, MessageCircleMore, X } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { companyConfig } from '../../lib/config'
 import { Button } from '../ui/button'
 
 export function Navbar() {
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/75 backdrop-blur-xl">
+    <header className={`site-navbar sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl ${scrolled ? 'is-scrolled' : ''}`}>
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
         <a href="#inicio" className="flex items-center gap-3 text-white">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-primary text-lg font-black shadow-glow">

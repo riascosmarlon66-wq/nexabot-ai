@@ -41,9 +41,9 @@ export function Plans() {
           <Reveal key={plan.name} delay={index * 0.06}>
             <div
               className={[
-                'flex h-full flex-col rounded-[30px] border p-6',
+                'premium-card flex h-full flex-col rounded-[30px] border p-6',
                 plan.popular
-                  ? 'border-primary/40 bg-gradient-to-b from-primary/10 to-transparent shadow-glow'
+                  ? 'plan-featured shimmer-surface border-primary/40 bg-gradient-to-b from-primary/10 to-transparent shadow-glow'
                   : 'border-white/10 bg-white/[0.03]',
               ].join(' ')}
             >
