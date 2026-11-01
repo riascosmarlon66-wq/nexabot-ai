@@ -1,0 +1,20 @@
+{
+  "name": "agente-server",
+  "version": "1.0.0",
+  "description": "Agent Core multiempresa para Chatbots para Empresas",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --check src/controllers/chat.controller.js && node --check src/agent/agent.js",
+    "test": "node --test"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}
