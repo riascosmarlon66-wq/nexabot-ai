@@ -23,6 +23,17 @@ npm run dev
 ## Salud
 `GET http://localhost:3001/health`
 
+## Webhook de WhatsApp
+Configura `WHATSAPP_TOKEN`, `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_API_VERSION` y
+`WHATSAPP_PHONE_NUMBER_ID` en el entorno del backend. Configura la URL de callback
+de Meta como `https://<dominio>/api/webhooks/whatsapp` y suscribe el webhook a
+mensajes. La conexión activa en `channel_connections` debe asociar el
+`phone_number_id` con una empresa y un agente de esa misma empresa.
+
+El endpoint `GET /api/webhooks/whatsapp` verifica el token y devuelve el
+challenge de Meta. El endpoint `POST /api/webhooks/whatsapp` recibe mensajes,
+usa el Agent Core existente y responde mediante WhatsApp Cloud API.
+
 ## Chat demo
 ```json
 {
@@ -34,7 +45,7 @@ npm run dev
 ## Chat multiempresa
 ```json
 {
-  "companyId": "restaurante123",
+  "companyId": "mi-empresa",
   "agentId": "ventas",
   "message": "¿Qué hamburguesas tienen?"
 }

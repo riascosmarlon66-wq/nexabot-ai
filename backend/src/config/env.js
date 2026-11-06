@@ -1,5 +1,11 @@
 import "dotenv/config";
 
+export function parseBooleanEnv(value, fallback = false) {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return fallback;
+}
+
 function required(name, fallback = "") {
   const value = process.env[name]?.trim() || fallback;
   if (!value) throw new Error(`Falta la variable de entorno ${name}`);
@@ -32,5 +38,6 @@ export const env = Object.freeze({
   whatsappToken: process.env.WHATSAPP_TOKEN || "",
   whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN || "",
   whatsappApiVersion: process.env.WHATSAPP_API_VERSION || "v20.0",
-  whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || ""
+  whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || "",
+  whatsappDevMode: parseBooleanEnv(process.env.WHATSAPP_DEV_MODE)
 });

@@ -1,4 +1,5 @@
 import { OllamaUnavailableError } from "../agent/agent.js";
+import { logFlowError } from "../lib/flow-diagnostics.js";
 
 export function errorMiddleware(error, _req, res, _next) {
   if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
@@ -9,6 +10,6 @@ export function errorMiddleware(error, _req, res, _next) {
     return res.status(503).json({ error: "Servicio de IA no disponible" });
   }
 
-  console.error("[ERROR] Error interno del servidor");
+  logFlowError("[ERROR]", "request", error);
   return res.status(500).json({ error: "Error interno del servidor" });
 }

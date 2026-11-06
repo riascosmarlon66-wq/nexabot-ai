@@ -6,6 +6,7 @@ import { isOllamaAvailable } from "./agent/agent.js";
 import chatRouter from "./routes/chat.js";
 import customersRouter from "./routes/customers.js";
 import whatsappRouter from "./channels/whatsapp/whatsapp.routes.js";
+import whatsappSimulationRouter from "./channels/whatsapp/whatsapp-simulation.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 
 export const app = express();
@@ -53,6 +54,7 @@ app.get("/health", async (_req, res) => {
 
 app.use("/api/chat", chatRouter);
 app.use("/api/customers", customersRouter);
+app.use("/api/dev/whatsapp", whatsappSimulationRouter);
 app.use("/api/webhooks/whatsapp", whatsappRouter);
 app.use(errorMiddleware);
 

@@ -3,11 +3,12 @@ import { supabase } from "../lib/supabase.js";
 export async function getConversationByCustomer({ companyId, agentId, customerId, channel }) {
   const { data, error } = await supabase
     .from("conversations")
-    .select("id, company_id, agent_id, customer_id, channel, last_activity_at")
+    .select("id, company_id, agent_id, customer_id, channel, status, last_activity_at")
     .eq("company_id", companyId)
     .eq("agent_id", agentId)
     .eq("customer_id", customerId)
     .eq("channel", channel)
+    .eq("status", "open")
     .order("last_activity_at", { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -24,9 +25,10 @@ export async function createConversation({ companyId, agentId, customerId, chann
       agent_id: agentId,
       customer_id: customerId,
       channel,
+      status: "open",
       last_activity_at: new Date().toISOString()
     })
-    .select("id, company_id, agent_id, customer_id, channel, last_activity_at")
+    .select("id, company_id, agent_id, customer_id, channel, status, last_activity_at")
     .single();
 
   if (error) throw error;

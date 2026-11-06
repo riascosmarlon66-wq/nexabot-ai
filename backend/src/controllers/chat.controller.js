@@ -1,11 +1,19 @@
 import companies from "../companies/companies.js";
-import { runAgent } from "../agent/agent.js";
 import { getCompanyBySlug } from "../repositories/company.repository.js";
 import { getAgentBySlug } from "../repositories/agent.repository.js";
-import { getProductsByCompany } from "../repositories/product.repository.js";
-import { getServicesByCompany } from "../repositories/service.repository.js";
+import { runAgentCore } from "../services/agent-core.service.js";
+import { logFlowError } from "../lib/flow-diagnostics.js";
 
 const MAX_MESSAGE_LENGTH = 2000;
+
+async function loadRepositoryStage(stage, load) {
+  try {
+    return await load();
+  } catch (error) {
+    logFlowError("[REPOSITORY]", stage, error);
+    throw error;
+  }
+}
 
 export async function postChat(req, res, next) {
   const body = req.body && typeof req.body === "object" ? req.body : {};
@@ -22,42 +30,48 @@ export async function postChat(req, res, next) {
   try {
     if (companyId === "demo") {
       const demoCompany = companies.demo;
-      const response = await runAgent(demoCompany, message);
+      const demoAgent = {
+        id: "demo",
+        company_id: demoCompany.id,
+        name: demoCompany.agentName,
+        instructions: demoCompany.instructions,
+        active: true
+      };
+      const response = await runAgentCore({
+        companyId: demoCompany.id,
+        agentId: demoAgent.id,
+        message,
+        company: demoCompany,
+        agent: demoAgent,
+        products: [],
+        services: []
+      });
       return res.json({ company: demoCompany.name, agent: demoCompany.agentName, response });
     }
 
     if (!agentId) return res.status(400).json({ error: "agentId es obligatorio" });
 
     console.info(`[INFO] Resolviendo empresa: ${companyId}`);
-    const company = await getCompanyBySlug(companyId);
+    const company = await loadRepositoryStage("company", () => getCompanyBySlug(companyId));
     if (!company) return res.status(404).json({ error: "Empresa no encontrada" });
 
-    const agent = await getAgentBySlug(company.id, agentId);
+    const agent = await loadRepositoryStage(
+      "agent",
+      () => getAgentBySlug(company.id, agentId)
+    );
     if (!agent) return res.status(404).json({ error: "Agente no encontrado para esta empresa" });
 
-    const products = await getProductsByCompany(company.id);
-    const services = await getServicesByCompany(company.id);
-    console.info(`[INFO] Contexto cargado | empresa=${companyId} agente=${agentId} productos=${products.length} servicios=${services.length}`);
-
-    const response = await runAgent({
-      name: company.name,
-      sector: company.sector,
-      agentName: agent.name,
-      role: agent.role,
-      instructions: agent.instructions,
-      products,
-      services
-    }, message);
+    const response = await runAgentCore({
+      companyId: company.id,
+      agentId: agent.id,
+      message,
+      company,
+      agent
+    });
 
     return res.json({ company: company.name, agent: agent.name, response });
   } catch (error) {
-    if (error && typeof error === "object") {
-      console.error("[ERROR] Falló POST /api/chat", {
-        message: typeof error.message === "string" ? error.message : String(error),
-        ...(error.code ? { code: error.code } : {}),
-        ...(error.hint ? { hint: error.hint } : {})
-      });
-    }
+    logFlowError("[API_CHAT]", "request", error);
     return next(error);
   }
 }

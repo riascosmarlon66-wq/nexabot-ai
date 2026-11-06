@@ -34,7 +34,8 @@ export async function findOrCreateWhatsAppCustomer({ companyId, waId }) {
       external_id: waId,
       name: null,
       email: null,
-      phone: null
+      phone: null,
+      active: true
     })
     .select("id, company_id, channel, external_id, name")
     .single();

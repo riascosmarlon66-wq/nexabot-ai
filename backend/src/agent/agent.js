@@ -1,4 +1,5 @@
 import { env } from "../config/env.js";
+import { logFlowError } from "../lib/flow-diagnostics.js";
 
 const antiHallucinationRules = `La información proporcionada por el sistema es la única fuente válida sobre esta empresa.
 PRODUCTOS DISPONIBLES provienen exclusivamente de la tabla products.
@@ -49,9 +50,11 @@ function buildSystemPrompt({ name, sector, agentName, role, instructions, produc
 }
 
 export class OllamaUnavailableError extends Error {
-  constructor(message = "Servicio de IA no disponible") {
-    super(message);
+  constructor(message = "Servicio de IA no disponible", options = {}) {
+    super(message, options.cause ? { cause: options.cause } : undefined);
     this.name = "OllamaUnavailableError";
+    if (options.status !== undefined) this.status = options.status;
+    if (options.statusCode !== undefined) this.statusCode = options.statusCode;
   }
 }
 
@@ -66,36 +69,67 @@ export async function isOllamaAvailable() {
   }
 }
 
-export async function runAgent(company, message) {
+export async function runAgent(company, message, {
+  fetchImpl = globalThis.fetch,
+  config = env
+} = {}) {
+  const ollamaBaseUrl = config.ollamaUrl.replace(/\/+$/, "");
+  const ollamaUrl = new URL(`${ollamaBaseUrl}/api/generate`).toString();
+  const requestOptions = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: config.ollamaModel,
+      stream: false,
+      prompt: `${buildSystemPrompt(company)}\n\nMENSAJE DEL CLIENTE:\n${message}`
+    }),
+    signal: AbortSignal.timeout(config.ollamaTimeoutMs)
+  };
+
   let response;
   try {
-    response = await fetch(`${env.ollamaUrl}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: env.ollamaModel,
-        stream: false,
-        messages: [
-          { role: "system", content: buildSystemPrompt(company) },
-          { role: "user", content: message }
-        ]
-      }),
-      signal: AbortSignal.timeout(env.ollamaTimeoutMs)
-    });
+    response = await fetchImpl(ollamaUrl, requestOptions);
   } catch (error) {
-    console.error("[ERROR] Ollama no disponible", { message: error?.message || String(error) });
-    throw new OllamaUnavailableError();
+    const unavailableError = new OllamaUnavailableError("Servicio de IA no disponible", {
+      cause: error
+    });
+    logFlowError("[AGENT_CORE]", "ollama_request", unavailableError);
+    throw unavailableError;
   }
 
   if (!response.ok) {
-    console.error("[ERROR] Ollama respondió con error", { status: response.status });
-    throw new OllamaUnavailableError();
+    const error = new Error(`Ollama respondió HTTP ${response.status}`);
+    error.status = response.status;
+    const unavailableError = new OllamaUnavailableError("Servicio de IA no disponible", {
+      cause: error,
+      status: response.status,
+      statusCode: response.status
+    });
+    logFlowError("[AGENT_CORE]", "ollama_http_response", unavailableError);
+    throw unavailableError;
   }
 
-  const data = await response.json();
-  if (!data?.message || typeof data.message.content !== "string") {
-    throw new OllamaUnavailableError("Respuesta inválida del servicio de IA");
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    const unavailableError = new OllamaUnavailableError(
+      "Respuesta inválida del servicio de IA",
+      { cause: error }
+    );
+    logFlowError("[AGENT_CORE]", "ollama_invalid_json", unavailableError);
+    throw unavailableError;
   }
 
-  return data.message.content;
+  if (typeof data?.response !== "string" || !data.response.trim()) {
+    const error = new Error("Ollama devolvió una respuesta inválida");
+    const unavailableError = new OllamaUnavailableError(
+      "Respuesta inválida del servicio de IA",
+      { cause: error }
+    );
+    logFlowError("[AGENT_CORE]", "ollama_invalid_response", unavailableError);
+    throw unavailableError;
+  }
+
+  return data.response;
 }

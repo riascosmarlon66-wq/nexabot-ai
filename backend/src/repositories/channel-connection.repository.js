@@ -11,7 +11,7 @@ export async function getChannelConnectionByPhoneNumberId(phoneNumberId) {
 
   const { data, error } = await supabase
     .from("channel_connections")
-    .select("company_id, agent_id, channel, phone_number_id, active")
+    .select("id, company_id, agent_id, phone_number_id, business_account_id, display_phone_number")
     .eq("channel", "whatsapp")
     .eq("phone_number_id", normalized)
     .eq("active", true)
