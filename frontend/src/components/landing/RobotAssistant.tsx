@@ -13,13 +13,13 @@ export function RobotAssistant() {
     greetingTimeout.current = window.setTimeout(() => {
       setGreeting(false)
       greetingTimeout.current = null
-    }, 1350)
+    }, 2200)
   }, [reduceMotion])
 
   useEffect(() => {
     if (reduceMotion) return
 
-    const greetingInterval = window.setInterval(triggerGreeting, 7000)
+    const greetingInterval = window.setInterval(triggerGreeting, 12000)
     return () => {
       window.clearInterval(greetingInterval)
       if (greetingTimeout.current !== null) {
@@ -30,9 +30,11 @@ export function RobotAssistant() {
   }, [reduceMotion, triggerGreeting])
 
   return (
-    <div
-      className="hero-mascot"
-    >
+    <div className="hero-mascot vektor-mascot">
+      <div className="vektor-orbit vektor-orbit-one" aria-hidden="true" />
+      <div className="vektor-orbit vektor-orbit-two" aria-hidden="true" />
+      <div className="vektor-star vektor-star-one" aria-hidden="true" />
+      <div className="vektor-star vektor-star-two" aria-hidden="true" />
       {/* Burbuja */}
       <motion.div
         className="mascot-message"
@@ -51,7 +53,7 @@ export function RobotAssistant() {
         }}
       >
         <span className="mascot-message-dot" />
-        {greeting ? "¡Hola! 👋" : "Listo para ayudarte"}
+        {greeting ? "¡Hola! Soy Vektor 👋" : "Tu agente está listo"}
       </motion.div>
 
       {/* Glow detrás del robot */}
@@ -77,7 +79,7 @@ export function RobotAssistant() {
       <motion.button
         type="button"
         className="robot-interactive"
-        aria-label="Saludar al asistente"
+        aria-label="Saludar a Vektor, el asistente de inteligencia artificial"
         onClick={triggerGreeting}
         animate={
           reduceMotion
@@ -89,8 +91,8 @@ export function RobotAssistant() {
                   scale: [1, 1.01, 1, 1.01, 1],
                 }
               : {
-                  y: [0, -12, 0],
-                  rotate: [0, 0.6, -0.6, 0],
+                  y: [0, -18, 0],
+                  rotate: [0, 2, -2, 0],
                 }
         }
         whileHover={
@@ -115,12 +117,12 @@ export function RobotAssistant() {
               }
             : {
                 y: {
-                  duration: 4.8,
+                  duration: 3.6,
                   repeat: Infinity,
                   ease: "easeInOut",
                 },
                 rotate: {
-                  duration: 7,
+                  duration: 5.2,
                   repeat: Infinity,
                   ease: "easeInOut",
                 },
@@ -158,7 +160,7 @@ export function RobotAssistant() {
         <span className="robot-status-icon">✓</span>
 
         <span>
-          <strong>Todo listo</strong>
+          <strong>VEKTOR AI activo</strong>
           <small>Pregunta, agenda o automatiza.</small>
         </span>
       </motion.div>
