@@ -29,10 +29,10 @@ export function Hero() {
 
           <div className="space-y-5">
             <h1 className="max-w-xl font-display text-4xl font-semibold leading-[0.95] tracking-[-0.08em] text-white md:text-6xl">
-              Un agente. Adaptado a tu negocio.
+              Un agente de IA. Todo tu negocio en movimiento.
             </h1>
             <p className="max-w-xl text-lg text-slate-300 md:text-xl">
-              Responde, vende, agenda y automatiza con un agente de IA configurado para tus clientes, tus procesos y la forma en que trabaja tu empresa.
+              Con VEKTOR AI tu empresa tiene un solo agente inteligente, personalizado con tus procesos y conectado a los canales que necesitas. Atiende, organiza y convierte conversaciones en oportunidades.
             </p>
           </div>
 
@@ -50,7 +50,7 @@ export function Hero() {
           </div>
 
           <div className="flex flex-wrap gap-4 text-sm text-slate-300">
-            {['Un agente para tu operación', 'Tu equipo mantiene el control', 'Conexiones según viabilidad'].map((item) => (
+            {['Un agente por empresa', 'Tu equipo conserva el control', 'Canales según integración'].map((item) => (
               <div key={item} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 {item}
@@ -60,14 +60,14 @@ export function Hero() {
         </Reveal>
 
         <Reveal delay={0.1} className="relative min-w-0">
-          <div className="hero-visual">
+          <div className="hero-visual vektor-hero-visual">
             <RobotAssistant />
           </div>
         </Reveal>
       </div>
 
       <Reveal delay={0.2} className="mx-auto mt-10 w-full max-w-xl">
-        <ChatPlay title="Una conversación, una acción" messages={exampleMessages} />
+        <ChatPlay title="VEKTOR AI en acción" messages={exampleMessages} />
       </Reveal>
 
       <Stats />
