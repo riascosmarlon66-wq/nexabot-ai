@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { supabase } from "../src/lib/supabase.js";
+import { buildWhatsAppEntryMessage } from "../src/channels/whatsapp/whatsapp-entry-token.js";
 
 const [, , companyId, agentId, name] = process.argv;
 
@@ -77,6 +78,22 @@ async function main() {
   console.log("");
   console.log("TOKEN:");
   console.log(token);
+  const publicWhatsAppNumber = process.env.WHATSAPP_PUBLIC_NUMBER?.replace(/\D/g, "");
+  if (publicWhatsAppNumber) {
+    const entryMessage = buildWhatsAppEntryMessage(token);
+    const whatsappUrl =
+      `https://wa.me/${publicWhatsAppNumber}?text=${encodeURIComponent(entryMessage)}`;
+
+    console.log("");
+    console.log("ENLACE WHATSAPP PARA ESTE NEGOCIO:");
+    console.log(whatsappUrl);
+  } else {
+    console.log("");
+    console.log(
+      "Para generar también el enlace wa.me agrega WHATSAPP_PUBLIC_NUMBER a backend/.env."
+    );
+  }
+
   console.log("");
   console.log(
     "IMPORTANTE: este token se muestra una sola vez. Guárdalo de forma segura."
