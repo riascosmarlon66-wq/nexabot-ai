@@ -1,4 +1,4 @@
-import { Bot, Menu, MessageCircleMore, X } from 'lucide-react'
+import { Bot, Menu, MessageCircleMore, X, Orbit } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { companyConfig } from '../../lib/config'
 import { Button } from '../ui/button'
@@ -19,11 +19,11 @@ export function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6">
         <a href="#inicio" className="flex items-center gap-3 text-white">
           <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-primary text-lg font-black shadow-glow">
-            <Bot className="h-5 w-5" />
+            <Orbit className="h-5 w-5" />
           </span>
           <div>
-            <div className="font-display text-lg font-semibold tracking-tight">Chatboots</div>
-            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">para empresas</div>
+            <div className="font-display text-lg font-semibold tracking-tight">VEKTOR <span className="text-primary">AI</span></div>
+            <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-slate-400">Tu agente empresarial</div>
           </div>
         </a>
 
