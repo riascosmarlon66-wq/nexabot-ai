@@ -17,6 +17,18 @@ export async function getConversationByCustomer({ companyId, agentId, customerId
   return data ?? null;
 }
 
+export async function getConversationById({ companyId, conversationId }) {
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("id, company_id, agent_id, customer_id, channel, status")
+    .eq("company_id", companyId)
+    .eq("id", conversationId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ?? null;
+}
+
 export async function createConversation({ companyId, agentId, customerId, channel }) {
   const { data, error } = await supabase
     .from("conversations")

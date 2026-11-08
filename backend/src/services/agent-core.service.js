@@ -1,9 +1,12 @@
-import { runAgent } from "../agent/agent.js";
+import { getAIProvider, AIProviderError } from "../ai/ai-provider.js";
+import { buildAgentSystemPrompt } from "../ai/agent-prompt.js";
 import { getCompanyById } from "../repositories/company.repository.js";
 import { getAgentById } from "../repositories/agent.repository.js";
 import { getProductsByCompany } from "../repositories/product.repository.js";
 import { getServicesByCompany } from "../repositories/service.repository.js";
+import { getRecentMessages } from "../repositories/message.repository.js";
 import { logFlowError } from "../lib/flow-diagnostics.js";
+import { env } from "../config/env.js";
 
 async function loadRepositoryStage(stage, load) {
   try {
@@ -14,24 +17,34 @@ async function loadRepositoryStage(stage, load) {
   }
 }
 
-export async function runAgentCore({
-  companyId,
-  agentId,
-  message,
-  customerId: _customerId,
-  conversationId: _conversationId,
-  company: providedCompany,
-  agent: providedAgent,
-  products: providedProducts,
-  services: providedServices
-}) {
+export async function runAgentCore(input, dependencies = {}) {
+  const {
+    companyId,
+    agentId,
+    message,
+    customerId,
+    conversationId,
+    company: providedCompany,
+    agent: providedAgent,
+    products: providedProducts,
+    services: providedServices,
+    context: providedContext,
+    currentMessagePersisted = false
+  } = input;
+  const loadCompany = dependencies.getCompanyById ?? getCompanyById;
+  const loadAgent = dependencies.getAgentById ?? getAgentById;
+  const loadProducts = dependencies.getProductsByCompany ?? getProductsByCompany;
+  const loadServices = dependencies.getServicesByCompany ?? getServicesByCompany;
+  const loadRecentMessages = dependencies.getRecentMessages ?? getRecentMessages;
+  const resolveAIProvider = dependencies.getAIProvider ?? getAIProvider;
+
   const company = providedCompany ?? await loadRepositoryStage(
     "company",
-    () => getCompanyById(companyId)
+    () => loadCompany(companyId)
   );
   const agent = providedAgent ?? await loadRepositoryStage(
     "agent",
-    () => getAgentById(agentId)
+    () => loadAgent(agentId)
   );
 
   if (!company || company.id !== companyId) {
@@ -45,26 +58,111 @@ export async function runAgentCore({
 
   const products = providedProducts ?? await loadRepositoryStage(
     "products",
-    () => getProductsByCompany(companyId)
+    () => loadProducts(companyId)
   );
   console.info("[AGENT_CORE] products loaded");
 
   const services = providedServices ?? await loadRepositoryStage(
     "services",
-    () => getServicesByCompany(companyId)
+    () => loadServices(companyId)
   );
   console.info("[AGENT_CORE] services loaded");
 
-  console.info("[AGENT_CORE] calling ollama");
-  const response = await runAgent({
+  let history = providedContext;
+  let historyMessages = typeof history === "string" && history
+    ? history.split("\n").map((line) => {
+        const match = /^(Cliente|Asistente):\s?([\s\S]*)$/.exec(line);
+        if (!match) return null;
+        return {
+          role: match[1] === "Cliente" ? "user" : "assistant",
+          content: match[2]
+        };
+      }).filter(Boolean)
+    : [];
+  let historyCount = historyMessages.length;
+  if (history === undefined && conversationId) {
+    const recentMessages = await loadRepositoryStage(
+      "recent_messages",
+      () => loadRecentMessages({ companyId, conversationId, limit: 10 })
+    );
+    const recentHistory = Array.isArray(recentMessages) ? [...recentMessages] : [];
+    if (currentMessagePersisted) {
+      let currentMessageIndex = -1;
+      for (let index = recentHistory.length - 1; index >= 0; index -= 1) {
+        const entry = recentHistory[index];
+        if (entry?.sender_type === "customer" && entry.content === message) {
+          currentMessageIndex = index;
+          break;
+        }
+      }
+      if (currentMessageIndex >= 0) recentHistory.splice(currentMessageIndex);
+    }
+
+    historyMessages = recentHistory
+      .filter((entry) =>
+        (entry?.sender_type === "customer" || entry?.sender_type === "agent") &&
+        typeof entry.content === "string"
+      )
+      .map((entry) => ({
+        role: entry.sender_type === "customer" ? "user" : "assistant",
+        content: entry.content
+      }));
+    historyCount = historyMessages.length;
+
+    console.info("[AGENT_CORE] conversation history loaded", {
+      conversationId,
+      count: historyMessages.length
+    });
+    console.info("[AGENT_CORE] history count", { count: historyMessages.length });
+    if (env.nodeEnv === "development") {
+      console.info("[AGENT_CORE] history roles", historyMessages.map(({ role, content }) => ({
+        role,
+        preview: typeof content === "string" ? `${content.slice(0, 60)}${content.length > 60 ? "..." : ""}` : ""
+      })));
+    }
+
+    history = historyMessages
+      .map(({ role, content }) => `${role === "user" ? "Cliente" : "Asistente"}: ${content}`)
+      .join("\n");
+  }
+
+  const systemPrompt = buildAgentSystemPrompt({
     name: company.name,
     sector: company.sector,
-    agentName: agent.name,
+    agentName: typeof agent?.name === "string"
+      ? agent.name.trim() || "No registrado"
+      : "No registrado",
     role: agent.role,
     instructions: agent.instructions,
     products,
     services
-  }, message);
-  console.info("[AGENT_CORE] ollama response received");
-  return response;
+  });
+  const provider = resolveAIProvider();
+  console.info("[AGENT_CORE] calling AI provider", {
+    provider: provider.constructor.name,
+    historyCount
+  });
+  const result = await provider.generateText({
+    systemPrompt,
+    userMessage: message,
+    context: {
+      companyId,
+      agentId,
+      customerId,
+      conversationId,
+      history: history || "",
+      historyMessages
+    }
+  });
+  if (!result || typeof result.text !== "string" || !result.text.trim()) {
+    throw new AIProviderError(
+      "AI_PROVIDER_INVALID_RESPONSE",
+      "Respuesta inválida del proveedor de IA"
+    );
+  }
+  console.info("[AGENT_CORE] AI provider response received", {
+    provider: result.provider,
+    model: result.model
+  });
+  return result.text;
 }

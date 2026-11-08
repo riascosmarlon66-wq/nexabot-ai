@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node src/server.js",
     "start": "node src/server.js",
-    "check": "node --check src/server.js && node --check src/controllers/chat.controller.js && node --check src/agent/agent.js",
+    "check": "node --check src/server.js && node --check src/controllers/chat.controller.js && node --check src/ai/ai-provider.js && node --check src/ai/providers/ollama.provider.js && node --check src/services/agent-core.service.js",
     "test": "node --test"
   },
   "license": "ISC",

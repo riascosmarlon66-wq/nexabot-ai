@@ -1,7 +1,8 @@
 import { env } from "../../config/env.js";
 import { processWhatsAppMessage } from "./whatsapp.service.js";
 
-const PHONE_NUMBER_ID_PATTERN = /^\d+$/;
+const PHONE_NUMBER_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
+const CUSTOMER_PHONE_PATTERN = /^\d+$/;
 
 export function createWhatsAppSimulationController(
   processMessage = processWhatsAppMessage,
@@ -12,15 +13,16 @@ export function createWhatsAppSimulationController(
       return res.sendStatus(404);
     }
 
-    const { phoneNumberId, from, message } = req.body ?? {};
+    const { phoneNumberId, from, message, entryToken } = req.body ?? {};
     if (
       typeof phoneNumberId !== "string" ||
       !PHONE_NUMBER_ID_PATTERN.test(phoneNumberId) ||
       typeof from !== "string" ||
-      !PHONE_NUMBER_ID_PATTERN.test(from) ||
+      !CUSTOMER_PHONE_PATTERN.test(from) ||
       typeof message !== "string" ||
       !message.trim() ||
-      message.trim().length > 2000
+      message.trim().length > 2000 ||
+      (entryToken !== undefined && (typeof entryToken !== "string" || !entryToken.trim()))
     ) {
       return res.status(400).json({
         ok: false,
@@ -33,12 +35,21 @@ export function createWhatsAppSimulationController(
       from,
       type: "text",
       text: message.trim()
-    }, { sendReply: false });
+    }, {
+      sendReply: false,
+      ...(entryToken ? { entryToken: entryToken.trim() } : {})
+    });
 
     if (result.status === "unconfigured") {
       return res.status(404).json({
         ok: false,
         error: "CHANNEL_CONNECTION_NOT_FOUND"
+      });
+    }
+    if (result.status === "invalid-entry-point") {
+      return res.status(404).json({
+        ok: false,
+        error: "BUSINESS_ENTRY_POINT_NOT_FOUND"
       });
     }
 
