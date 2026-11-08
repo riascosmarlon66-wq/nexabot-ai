@@ -9,10 +9,10 @@ export function FinalCTA() {
           <MessageSquareText className="h-6 w-6" />
         </div>
         <h3 className="font-display text-3xl text-white md:text-5xl">
-          Mientras lees esto, tus clientes podrían estar esperando una respuesta.
+          Tu próximo gran aliado no es otro equipo. Es tu agente VEKTOR AI.
         </h3>
         <p className="mx-auto mt-4 max-w-2xl text-base text-slate-300 md:text-lg">
-          Una buena atención cambia la experiencia de compra y también mejora la percepción de tu marca.
+          Un agente personalizado para tu empresa, preparado para ayudarte a atender clientes, organizar solicitudes y crecer.
         </p>
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
           <Button variant="gradient" size="xl" asChild>
