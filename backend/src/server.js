@@ -3,6 +3,7 @@ import cors from "cors";
 import { env } from "./config/env.js";
 import chatRouter from "./routes/chat.js";
 import customersRouter from "./routes/customers.js";
+import demoRouter from "./routes/demo.js";
 import whatsappRouter from "./channels/whatsapp/whatsapp.routes.js";
 import whatsappSimulationRouter from "./channels/whatsapp/whatsapp-simulation.routes.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
@@ -26,6 +27,7 @@ app.get("/health", createHealthController());
 
 app.use("/api/chat", chatRouter);
 app.use("/api/customers", customersRouter);
+app.use("/api/demo", demoRouter);
 app.use("/api/dev/whatsapp", whatsappSimulationRouter);
 app.use("/api/webhooks/whatsapp", whatsappRouter);
 app.use(errorMiddleware);
