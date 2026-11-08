@@ -1,4 +1,4 @@
-import { Bot, Menu, MessageCircleMore, X, Orbit } from 'lucide-react'
+import { Menu, MessageCircleMore, X, Orbit } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { companyConfig } from '../../lib/config'
 import { Button } from '../ui/button'
