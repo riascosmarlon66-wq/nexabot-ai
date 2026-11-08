@@ -3,7 +3,13 @@ import { getChannelConnectionByPhoneNumberId } from "../../repositories/channel-
 import { getAgentById } from "../../repositories/agent.repository.js";
 import { findOrCreateWhatsAppCustomer } from "../../repositories/customer.repository.js";
 import { getOrCreateConversation } from "../../repositories/conversation.repository.js";
+import { createMessage } from "../../repositories/message.repository.js";
+import {
+  getActiveCustomerRoutingSession,
+  saveCustomerRoutingSession
+} from "../../repositories/customer-routing-session.repository.js";
 import { runAgentCore } from "../../services/agent-core.service.js";
+import { resolveBusinessContext } from "../../services/business-router.service.js";
 import { logFlowError } from "../../lib/flow-diagnostics.js";
 
 const PHONE_NUMBER_ID_PATTERN = /^\d+$/;
@@ -54,107 +60,233 @@ export function createWhatsAppService(overrides = {}) {
     getAgentById,
     findOrCreateWhatsAppCustomer,
     getOrCreateConversation,
+    getActiveCustomerRoutingSession,
+    saveCustomerRoutingSession,
+    resolveBusinessContext,
+    createMessage,
     runAgentCore,
     sendWhatsAppTextMessage,
     ...overrides
   };
 
-  return async function processWhatsAppMessage(message, { sendReply = true } = {}) {
-    let stage = "channel_connection";
-    let connection;
-    try {
-      connection = await dependencies.getChannelConnectionByPhoneNumberId(message.phoneNumberId);
-    } catch (error) {
-      logFlowError("[REPOSITORY]", stage, error);
-      throw error;
+  return async function processWhatsAppMessage(
+    message,
+    { sendReply = true, entryToken } = {}
+  ) {
+    let stage = "router";
+    let companyId;
+    let agentId;
+    let customerId;
+    let conversationId;
+    let agent;
+    let hasResolvedCustomer = false;
+    let hasResolvedConversation = false;
+
+    console.info("[ROUTER] entryToken received", { tokenPresent: Boolean(entryToken) });
+    if (entryToken) {
+      let context;
+      try {
+        context = await dependencies.resolveBusinessContext({
+          phoneNumberId: message.phoneNumberId,
+          customerPhone: message.from,
+          entryToken
+        });
+      } catch (error) {
+        logFlowError("[ROUTER]", stage, error);
+        throw error;
+      }
+      if (!context) return { status: "invalid-entry-point" };
+      if (context.status === "invalid-agent") return context;
+
+      ({ companyId, agentId, customerId, conversationId, agent } = context);
+      if (
+        typeof companyId !== "string" || !companyId ||
+        typeof agentId !== "string" || !agentId ||
+        typeof customerId !== "string" || !customerId ||
+        typeof conversationId !== "string" || !conversationId
+      ) {
+        return { status: "invalid-entry-point" };
+      }
+      hasResolvedCustomer = true;
+      hasResolvedConversation = true;
+      console.info("[ROUTER] entry point resolved", { companyId, agentId });
+    } else {
+      let routingSession;
+      try {
+        routingSession = await dependencies.getActiveCustomerRoutingSession({
+          phoneNumberId: message.phoneNumberId,
+          customerPhone: message.from
+        });
+      } catch (error) {
+        logFlowError("[ROUTER]", "routing_session", error);
+        throw error;
+      }
+
+      if (routingSession) {
+        ({
+          company_id: companyId,
+          agent_id: agentId,
+          customer_id: customerId,
+          conversation_id: conversationId
+        } = routingSession);
+        if (
+          typeof companyId !== "string" || !companyId ||
+          typeof agentId !== "string" || !agentId ||
+          typeof customerId !== "string" || !customerId ||
+          typeof conversationId !== "string" || !conversationId
+        ) {
+          return { status: "invalid-routing-session" };
+        }
+        hasResolvedCustomer = true;
+        hasResolvedConversation = true;
+        console.info("[ROUTER] routing session resolved", { companyId, agentId });
+      } else {
+        stage = "channel_connection";
+        let connection;
+        try {
+          connection = await dependencies.getChannelConnectionByPhoneNumberId(message.phoneNumberId);
+        } catch (error) {
+          logFlowError("[REPOSITORY]", stage, error);
+          throw error;
+        }
+        if (!connection) {
+          console.warn("[WARN] Evento WhatsApp recibido sin conexión activa");
+          return { status: "unconfigured" };
+        }
+        if (
+          connection.phone_number_id !== message.phoneNumberId ||
+          typeof connection.company_id !== "string" ||
+          !connection.company_id ||
+          typeof connection.agent_id !== "string" ||
+          !connection.agent_id
+        ) {
+          console.warn("[WARN] Conexión WhatsApp incompleta o inválida");
+          return { status: "invalid-connection" };
+        }
+        ({ company_id: companyId, agent_id: agentId } = connection);
+      }
     }
-    if (!connection) {
-      console.warn("[WARN] Evento WhatsApp recibido sin conexión activa");
-      return { status: "unconfigured" };
-    }
-    console.info("[SIMULATOR] channel connection resolved");
+
     if (
-      connection.phone_number_id !== message.phoneNumberId ||
-      typeof connection.company_id !== "string" ||
-      !connection.company_id ||
-      typeof connection.agent_id !== "string" ||
-      !connection.agent_id
+      typeof companyId !== "string" || !companyId ||
+      typeof agentId !== "string" || !agentId
     ) {
-      console.warn("[WARN] Conexión WhatsApp incompleta o inválida");
       return { status: "invalid-connection" };
     }
-    console.info("[SIMULATOR] company resolved");
 
     stage = "agent";
-    let agent;
-    try {
-      agent = await dependencies.getAgentById(connection.agent_id);
-    } catch (error) {
-      logFlowError("[REPOSITORY]", stage, error);
-      throw error;
+    if (!agent) {
+      try {
+        agent = await dependencies.getAgentById(agentId);
+      } catch (error) {
+        logFlowError("[REPOSITORY]", stage, error);
+        throw error;
+      }
     }
     if (
       !agent ||
-      agent.id !== connection.agent_id ||
-      agent.company_id !== connection.company_id ||
+      agent.id !== agentId ||
+      agent.company_id !== companyId ||
       agent.active !== true
     ) {
-      console.warn("[WARN] Conexión WhatsApp asociada a un agente inválido");
+      console.warn("[WARN] Ruta WhatsApp asociada a un agente inválido");
       return { status: "invalid-agent" };
     }
-    console.info("[SIMULATOR] agent resolved");
+    console.info("[ROUTER] agent resolved", { companyId, agentId });
 
     if (message.type !== "text") return { status: "unsupported" };
 
-    stage = "customer";
-    let customer;
-    try {
-      customer = await dependencies.findOrCreateWhatsAppCustomer({
-        companyId: connection.company_id,
-        waId: message.from
-      });
-    } catch (error) {
-      logFlowError("[REPOSITORY]", stage, error);
-      throw error;
+    if (!hasResolvedCustomer) {
+      stage = "customer";
+      let customer;
+      try {
+        customer = await dependencies.findOrCreateWhatsAppCustomer({
+          companyId,
+          waId: message.from
+        });
+      } catch (error) {
+        logFlowError("[REPOSITORY]", stage, error);
+        throw error;
+      }
+      customerId = customer.id;
     }
-    console.info("[SIMULATOR] customer resolved");
 
-    stage = "conversation";
-    let conversation;
-    try {
-      conversation = await dependencies.getOrCreateConversation({
-        companyId: connection.company_id,
-        agentId: connection.agent_id,
-        customerId: customer.id,
-        channel: "whatsapp"
-      });
-    } catch (error) {
-      logFlowError("[REPOSITORY]", stage, error);
-      throw error;
+    if (!hasResolvedConversation) {
+      stage = "conversation";
+      let conversation;
+      try {
+        conversation = await dependencies.getOrCreateConversation({
+          companyId,
+          agentId,
+          customerId,
+          channel: "whatsapp"
+        });
+      } catch (error) {
+        logFlowError("[REPOSITORY]", stage, error);
+        throw error;
+      }
+      conversationId = conversation.id;
     }
-    console.info("[SIMULATOR] conversation resolved");
+
+    if (entryToken) {
+      try {
+        await dependencies.saveCustomerRoutingSession({
+          phoneNumberId: message.phoneNumberId,
+          customerPhone: message.from,
+          companyId,
+          agentId,
+          customerId,
+          conversationId
+        });
+      } catch (error) {
+        logFlowError("[REPOSITORY]", "routing_session_update", error);
+        throw error;
+      }
+      console.info("[ROUTER] routing session updated", {
+        companyId,
+        agentId,
+        conversationId
+      });
+    }
+
+    await dependencies.createMessage({
+      companyId,
+      conversationId,
+      senderType: "customer",
+      content: message.text,
+      channel: "whatsapp"
+    });
 
     stage = "agent_core";
     let responseText;
     try {
       responseText = await dependencies.runAgentCore({
-        companyId: connection.company_id,
-        agentId: connection.agent_id,
+        companyId,
+        agentId,
         message: message.text,
-        customerId: customer.id,
-        conversationId: conversation.id,
+        customerId,
+        conversationId,
+        currentMessagePersisted: true,
         agent
       });
     } catch (error) {
-      if (!(error && error.name === "OllamaUnavailableError")) {
+      if (!(typeof error?.code === "string" && error.code.startsWith("AI_PROVIDER_"))) {
         logFlowError("[SIMULATOR]", stage, error);
       }
       throw error;
     }
 
+    await dependencies.createMessage({
+      companyId,
+      conversationId,
+      senderType: "agent",
+      content: responseText,
+      channel: "whatsapp"
+    });
+
     if (sendReply) {
       await dependencies.sendWhatsAppTextMessage({
-        phoneNumberId: connection.phone_number_id,
+        phoneNumberId: message.phoneNumberId,
         to: message.from,
         text: responseText
       });
@@ -162,10 +294,10 @@ export function createWhatsAppService(overrides = {}) {
 
     return {
       status: "processed",
-      companyId: connection.company_id,
-      agentId: connection.agent_id,
-      customerId: customer.id,
-      conversationId: conversation.id,
+      companyId,
+      agentId,
+      customerId,
+      conversationId,
       reply: responseText
     };
   };

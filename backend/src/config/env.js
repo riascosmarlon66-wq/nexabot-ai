@@ -6,6 +6,10 @@ export function parseBooleanEnv(value, fallback = false) {
   return fallback;
 }
 
+export function resolveAIProviderName(value) {
+  return value?.trim() || "ollama";
+}
+
 function required(name, fallback = "") {
   const value = process.env[name]?.trim() || fallback;
   if (!value) throw new Error(`Falta la variable de entorno ${name}`);
@@ -33,6 +37,7 @@ export const env = Object.freeze({
   ollamaUrl: process.env.OLLAMA_URL || "http://localhost:11434",
   ollamaModel: process.env.OLLAMA_MODEL || "llama3.2",
   ollamaTimeoutMs: Number(process.env.OLLAMA_TIMEOUT_MS || 30000),
+  aiProvider: resolveAIProviderName(process.env.AI_PROVIDER),
   supabaseUrl: required("SUPABASE_URL", "https://example.supabase.co"),
   supabaseSecretKey: validateBackendSupabaseKey(required("SUPABASE_SECRET_KEY", "sb_secret_test_key")),
   whatsappToken: process.env.WHATSAPP_TOKEN || "",
