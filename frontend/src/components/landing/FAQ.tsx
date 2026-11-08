@@ -22,7 +22,7 @@ export function FAQ() {
     <section className="mx-auto max-w-5xl px-4 py-20 md:px-6">
       <SectionHeader
         eyebrow="FAQ"
-        title="Preguntas frecuentes sobre Chatboots para Empresas"
+        title="Preguntas frecuentes sobre VEKTOR AI"
         description="Estas respuestas te ayudan a entender cómo funciona la estrategia y qué esperar en una primera implementación."
         align="center"
       />

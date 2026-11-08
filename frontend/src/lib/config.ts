@@ -3,15 +3,15 @@ const contactPhone = '+57 312 376 2855'
 const contactPhoneDigits = contactPhone.replace(/\D/g, '')
 
 export const companyConfig = {
-  name: 'Chatboots para Empresas',
-  tagline: 'Agentes de IA para empresas que quieren responder antes, vender más y ahorrar tiempo.',
+  name: 'VEKTOR AI',
+  tagline: 'Un solo agente inteligente, adaptado a tus clientes, procesos y canales.',
   contact: {
     email: contactEmail,
     emailUrl: `mailto:${contactEmail}`,
     phone: contactPhone,
     phoneUrl: `tel:+${contactPhoneDigits}`,
     location: 'Colombia',
-    whatsappUrl: `https://wa.me/${contactPhoneDigits}?text=${encodeURIComponent('Hola, quiero saber más sobre un chatbot para mi empresa.')}`,
+    whatsappUrl: `https://wa.me/${contactPhoneDigits}?text=${encodeURIComponent('Hola, quiero conocer VEKTOR AI para mi empresa.')}`,
   },
   navItems: [
     { label: 'Inicio', href: '#inicio' },

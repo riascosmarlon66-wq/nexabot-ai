@@ -6,19 +6,19 @@ import { SectionHeader } from './SectionHeader'
 const plans = [
   {
     name: 'Esencial',
-    description: 'Para negocios que quieren empezar con un proceso prioritario y alcance definido.',
+    description: 'Tu agente personalizado para comenzar con un proceso prioritario.',
     popular: false,
     features: ['Un proceso inicial', 'Conocimiento del negocio', 'Alcance acordado', 'Revisión de resultados'],
   },
   {
     name: 'Crecimiento',
-    description: 'Para equipos que necesitan ampliar procesos y organizar un mayor volumen de solicitudes.',
+    description: 'El mismo agente, preparado para más conversaciones y procesos.',
     popular: true,
     features: ['Más procesos configurables', 'Flujos personalizados', 'Evaluación de conexiones', 'Ajustes según alcance'],
   },
   {
     name: 'Empresa',
-    description: 'Para operaciones con distintos equipos, procesos y necesidades de integración.',
+    description: 'Un solo agente para una operación con integraciones y procesos más complejos.',
     popular: false,
     features: ['Alcance por operación', 'Procesos por equipo', 'Integraciones por viabilidad', 'Plan de evolución'],
   },
@@ -30,8 +30,8 @@ export function Plans() {
       <Reveal>
         <SectionHeader
           eyebrow="Planes"
-          title="Elige la opción que mejor encaja con tu operación"
-          description="El alcance se define según procesos, volumen, sistemas y viabilidad técnica. No hay precios ni integraciones asumidos de antemano."
+          title="Un solo agente. El alcance que tu empresa necesita."
+          description="Cada plan contempla un agente principal por empresa. La diferencia está en los procesos, el volumen, la personalización y las integraciones acordadas."
           align="center"
         />
       </Reveal>

@@ -31,10 +31,10 @@ export default function Index() {
       <Hero />
       <Problems />
       <Comparison />
-      <Benefits />
-      <Calculator />
-      <Solutions />
       <DemoAgent onContinue={setLeadContext} />
+      <Benefits />
+      <Solutions />
+      <Calculator />
       <Sectors />
       <Process />
       <Integrations />
