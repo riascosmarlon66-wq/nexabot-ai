@@ -11,6 +11,7 @@ import {
 import { runAgentCore } from "../../services/agent-core.service.js";
 import { resolveBusinessContext } from "../../services/business-router.service.js";
 import { logFlowError } from "../../lib/flow-diagnostics.js";
+import { extractEmbeddedEntryToken } from "./whatsapp-entry-token.js";
 
 const PHONE_NUMBER_ID_PATTERN = /^\d+$/;
 
@@ -82,14 +83,21 @@ export function createWhatsAppService(overrides = {}) {
     let hasResolvedCustomer = false;
     let hasResolvedConversation = false;
 
-    console.info("[ROUTER] entryToken received", { tokenPresent: Boolean(entryToken) });
-    if (entryToken) {
+    const embeddedEntry = extractEmbeddedEntryToken(message.text);
+    const effectiveEntryToken = entryToken || embeddedEntry.entryToken;
+    const messageText = entryToken ? message.text : embeddedEntry.cleanText;
+
+    console.info("[ROUTER] entryToken received", {
+      tokenPresent: Boolean(effectiveEntryToken),
+      source: entryToken ? "explicit" : (embeddedEntry.entryToken ? "message" : "none")
+    });
+    if (effectiveEntryToken) {
       let context;
       try {
         context = await dependencies.resolveBusinessContext({
           phoneNumberId: message.phoneNumberId,
           customerPhone: message.from,
-          entryToken
+          entryToken: effectiveEntryToken
         });
       } catch (error) {
         logFlowError("[ROUTER]", stage, error);
@@ -228,7 +236,7 @@ export function createWhatsAppService(overrides = {}) {
       conversationId = conversation.id;
     }
 
-    if (entryToken) {
+    if (effectiveEntryToken) {
       try {
         await dependencies.saveCustomerRoutingSession({
           phoneNumberId: message.phoneNumberId,
@@ -253,7 +261,7 @@ export function createWhatsAppService(overrides = {}) {
       companyId,
       conversationId,
       senderType: "customer",
-      content: message.text,
+      content: messageText,
       channel: "whatsapp"
     });
 
@@ -263,7 +271,7 @@ export function createWhatsAppService(overrides = {}) {
       responseText = await dependencies.runAgentCore({
         companyId,
         agentId,
-        message: message.text,
+        message: messageText,
         customerId,
         conversationId,
         currentMessagePersisted: true,
