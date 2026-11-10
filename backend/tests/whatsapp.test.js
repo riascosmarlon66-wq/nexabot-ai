@@ -132,6 +132,7 @@ test("POST webhook ignora mensajes que no sean de texto", () => {
 
 test("phone_number_id desconocido no crea customer/conversation ni llama al agente", async () => {
   const process = createWhatsAppService({
+    getActiveCustomerRoutingSession: async () => null,
     getChannelConnectionByPhoneNumberId: async () => null,
     getAgentById: async () => assert.fail("No debe buscar agente"),
     findOrCreateWhatsAppCustomer: async () => assert.fail("No debe crear customer"),
@@ -147,6 +148,7 @@ test("phone_number_id desconocido no crea customer/conversation ni llama al agen
 
 test("agente de otra empresa no se procesa", async () => {
   const process = createWhatsAppService({
+    getActiveCustomerRoutingSession: async () => null,
     getChannelConnectionByPhoneNumberId: async () => ({
       company_id: "company-1",
       agent_id: "agent-1",
@@ -171,6 +173,7 @@ test("agente de otra empresa no se procesa", async () => {
 test("conexión válida resuelve empresa, agente, customer y conversation", async () => {
   const calls = [];
   const process = createWhatsAppService({
+    getActiveCustomerRoutingSession: async () => null,
     getChannelConnectionByPhoneNumberId: async (phoneNumberId) => {
       calls.push(["connection", phoneNumberId]);
       return {
@@ -192,6 +195,7 @@ test("conexión válida resuelve empresa, agente, customer y conversation", asyn
       calls.push(["conversation", input]);
       return { id: "conversation-1" };
     },
+    createMessage: async (input) => calls.push(["message", input.senderType, input]),
     runAgentCore: async (input) => {
       calls.push(["agentCore", input]);
       return "Respuesta";
@@ -209,7 +213,14 @@ test("conexión válida resuelve empresa, agente, customer y conversation", asyn
     reply: "Respuesta"
   });
   assert.deepEqual(calls.map(([name]) => name), [
-    "connection", "agent", "customer", "conversation", "agentCore", "send"
+    "connection", "agent", "customer", "conversation",
+    "message", "agentCore", "message", "send"
+  ]);
+  assert.deepEqual(calls
+    .filter(([name]) => name === "message")
+    .map(([, senderType, saved]) => [senderType, saved.content, saved.channel]), [
+    ["customer", "Hola", "whatsapp"],
+    ["agent", "Respuesta", "whatsapp"]
   ]);
   assert.deepEqual(calls.find(([name]) => name === "customer")[1], {
     companyId: "company-1",
@@ -227,8 +238,10 @@ test("conexión válida resuelve empresa, agente, customer y conversation", asyn
     message: "Hola",
     customerId: "customer-1",
     conversationId: "conversation-1",
+    currentMessagePersisted: true,
     agent: { id: "agent-1", company_id: "company-1", active: true }
   });
+  assert.equal(calls.find(([name]) => name === "agentCore")[1].conversationId, "conversation-1");
   assert.deepEqual(calls.find(([name]) => name === "send")[1], {
     phoneNumberId: "123456789",
     to: "987654321",
